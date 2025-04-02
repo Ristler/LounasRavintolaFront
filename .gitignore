@@ -1,0 +1,23 @@
+# Ignore compiled files
+*.class
+*.o
+*.exe
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore environment files
+.env
+config/settings.json
+
+# Ignore node_modules and dependencies
+node_modules/
+vendor/
+
+# Ignore log files
+*.log
+
+# Ignore everything in a folder except a file
+config/*
+!config/important.conf
