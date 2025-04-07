@@ -3,17 +3,19 @@ import { Form, Input, Button, Card, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
-export default function Login() {
+export default function Register() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
 
-  //SIMULOIDAAN KIRJAUTUMISTA, TÄÄ PITÄÄ VAIHTAA OIKEEEN API KUTSUUN
+
+  //SIMULOIDAAN REKISTERÖITYMISTÄ, TÄÄ PITÄÄ VAIHTAA OIKEEEN API KUTSUUN
   const onFinish = async (values) => {
     try {
-     
+      
       console.log('Login form values:', values);
       
+   
       localStorage.setItem('token', 'example-token');
       message.success('Kirjautuminen onnistui!');
       navigate('/profiili');
@@ -22,9 +24,10 @@ export default function Login() {
     }
   };
 
+
   return (
     <div className="flex justify-center items-center min-h-full p-4">
-      <Card title="Kirjaudu sisään" className="w-full max-w-md">
+      <Card title="Rekisteröidy" className="w-full max-w-md">
         <Form
           form={form}
           name="login"
@@ -59,7 +62,7 @@ export default function Login() {
 
           <Form.Item>
             <Button type="primary" htmlType="submit" className="w-full" size="large">
-              Kirjaudu sisään
+              Liity mukaan
             </Button>
           </Form.Item>
         </Form>
