@@ -1,9 +1,11 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}",],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
-
+// tailwind.config.js
+export default {
+    content: [
+      "./index.html",  // Vite will scan these files
+      "./src/**/*.{js,ts,jsx,tsx}",
+    ],
+    theme: {
+      extend: {},
+    },
+    plugins: [],
+  };

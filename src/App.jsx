@@ -52,11 +52,11 @@ function App() {
 
 
     <Router>
-      <Layout theme="dark">
+      <Layout>
 
 
-        <Header>
-          <Menu mode="horizontal" className="text-center flex justify-center w-full" theme="dark">
+        <Header theme="dark">
+          <Menu mode="horizontal" className="text-center flex justify-center w-full">
           <Menu.Item key="1" icon={<HomeOutlined />} onClick={handleMenu}>
             Kotiin
           </Menu.Item>
@@ -85,7 +85,7 @@ function App() {
         </Content>
 
 
-        <Footer className='text-center bg-black text-white'>Footer Content</Footer>
+        <Footer className='text-center text-white'>Lounasravintola 2025</Footer>
       </Layout>
     </Router>
 
