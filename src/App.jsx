@@ -11,9 +11,9 @@ import { HomeOutlined, ProfileOutlined, ShoppingCartOutlined } from '@ant-design
 import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom";
 
 //SIVU KOMPONETIT
-import Login from './pages/login';
-import Landing from './pages/landing'; 
-import Profile from './pages/profile'; 
+import Login from './components/login';
+import Landing from './components/landing'; 
+import Profile from './components/profile'; 
 
 //ANTD LAYOUTIN KOMPONENTIT
 const { Header, Footer, Content } = Layout;
