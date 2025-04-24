@@ -13,7 +13,8 @@ const { Header, Footer, Content } = Layout;
 
 function App() {
   return (
-    <Router>
+    <Router basename="/">  {/* Add basename here */}
+
       <Layout className="h-screen flex flex-col">
       
         <Header className="bg-gray-800 text-white flex-none p-0">
