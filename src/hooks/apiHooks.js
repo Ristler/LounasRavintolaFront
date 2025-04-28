@@ -9,7 +9,15 @@ const getAllFoods = async () => {
     if (!foodApiUrl) {
       throw new Error('API URL is undefined. Check your environment variables.');
     }
-    const response = await fetchData(foodApiUrl);
+    // Add options object with mode: 'cors'
+    const options = {
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    };
+    
+    const response = await fetchData(foodApiUrl, options);
     console.log('Foods fetched successfully:', response);
     return response;
   } catch (error) {
