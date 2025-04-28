@@ -36,6 +36,20 @@ export default function Register() {
           requiredMark={false}
         >
           <Form.Item
+            name="name"
+            rules={[
+              { required: true, message: 'Syötä nimesi' },
+            ]}
+          >
+            <Input 
+              prefix={<UserOutlined />} 
+              placeholder="Nimi" 
+              size="large"
+            />
+          </Form.Item>
+
+
+          <Form.Item
             name="email"
             rules={[
               { required: true, message: 'Syötä sähköpostiosoite!' },
