@@ -2,6 +2,8 @@ import React from 'react';
 import { Form, Input, Button, Card, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { newUser } from '../hooks/userApiHook';
+
 
 export default function Register() {
   const navigate = useNavigate();
@@ -9,18 +11,23 @@ export default function Register() {
 
 
 
-  //SIMULOIDAAN REKISTERÖITYMISTÄ, TÄÄ PITÄÄ VAIHTAA OIKEEEN API KUTSUUN
   const onFinish = async (values) => {
     try {
+      console.log('Registration form values:', values.name, values.email, values.password);
       
-      console.log('Login form values:', values);
+      const response = await newUser(values);
       
-   
-      localStorage.setItem('token', 'example-token');
-      message.success('Kirjautuminen onnistui!');
-      navigate('/profiili');
+      if (response) {
+        const token = response.token;
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(response));
+        message.success('Rekisteröityminen onnistui!');
+        navigate('/profiili');
+      } else {
+        throw new Error('Rekisteröityminen epäonnistui - virheellinen vastaus');
+      }
     } catch (error) {
-      message.error('Kirjautuminen epäonnistui!');
+      alert(error.message);
     }
   };
 
@@ -35,6 +42,20 @@ export default function Register() {
           layout="vertical"
           requiredMark={false}
         >
+          <Form.Item
+            name="name"
+            rules={[
+              { required: true, message: 'Syötä nimesi' },
+            ]}
+          >
+            <Input 
+              prefix={<UserOutlined />} 
+              placeholder="Nimi" 
+              size="large"
+            />
+          </Form.Item>
+
+
           <Form.Item
             name="email"
             rules={[

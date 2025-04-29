@@ -9,6 +9,7 @@ Thumbs.db
 
 # Ignore environment files
 .env
+.env.production
 config/settings.json
 
 # Ignore node_modules and dependencies
