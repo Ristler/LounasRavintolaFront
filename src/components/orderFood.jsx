@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Button, message, Spin, Typography, Badge, Rate } from "antd";
 import { ShoppingCartOutlined, HeartOutlined  } from '@ant-design/icons';
 import { useCart } from '../context/CartContext';
-import { getAllFoods } from '../hooks/apiHooks';
+import { getAllFoods } from '../hooks/foodApiHook';
 
 const { Title, Paragraph } = Typography;
 

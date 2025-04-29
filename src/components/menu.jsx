@@ -85,6 +85,7 @@ export default function HeaderMenu() {
   const handleAuth = (isAuth) => {
     if (isAuth) {
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
       setIsAuthenticated(false);
       navigate("/");
     } else {
@@ -104,7 +105,7 @@ export default function HeaderMenu() {
     <nav className="bg-gray-800 shadow-md">
      
       <div className="hidden md:flex flex-col items-center px-6 py-0 max-w-7xl mx-auto">
-        {/* Logo centered at top */}
+  
 
         
         <div className="flex items-center justify-center w-full">
@@ -180,7 +181,7 @@ export default function HeaderMenu() {
       
       {/* Mobile Menu Button */}
       <div className="md:hidden flex justify-between items-center px-4 py-3">
-        <div className="text-white font-bold">LounasRavintola</div>
+   
         
         <div className="flex items-center space-x-3">
           <Popover 
