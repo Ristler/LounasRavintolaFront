@@ -1,23 +1,17 @@
-
 import { Popover, Button, Badge } from "antd";
 import { 
-  HomeOutlined,
-  UserOutlined, 
-  ShoppingCartOutlined,
-  ShoppingOutlined,
-  DeleteOutlined,
-  LoginOutlined,
-  LogoutOutlined,
-  UserAddOutlined,
-  MenuOutlined
+  HomeOutlined, UserOutlined, ShoppingCartOutlined, ShoppingOutlined,
+  DeleteOutlined, LoginOutlined, LogoutOutlined, UserAddOutlined, 
+  MenuOutlined, 
 } from '@ant-design/icons';
 
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useCart } from '../context/CartContext.jsx';
+import ShoppingCart from "./shoppingCart";
 
 export default function HeaderMenu() {
-  const { cartItems, removeFromCart, getCartTotal } = useCart();
+  const { cartItems } = useCart();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -28,54 +22,6 @@ export default function HeaderMenu() {
     setIsAuthenticated(!!token);
   }, [location]);
   
-  const CartContent = () => (
-    <div className="min-w-[280px] max-h-[400px] overflow-y-auto py-2">
-      {cartItems.length === 0 ? (
-        <div className="flex flex-col items-center py-6">
-          <ShoppingCartOutlined className="text-3xl text-gray-300 mb-2" />
-          <p className="text-gray-500">Ostoskori on tyhjä</p>
-        </div>
-      ) : (
-        <>
-          {cartItems.map(item => (
-            <div key={item.id} className="flex justify-between items-center mb-3 p-2 hover:bg-gray-50 rounded-lg transition duration-150">
-              <div className="flex items-center gap-3">
-                <img 
-                  src={item.photo} 
-                  alt={item.name} 
-                  className="w-12 h-12 object-cover rounded-md shadow-sm"
-                />
-                <span className="font-medium">{item.name}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="font-semibold text-orange-500">{item.price}€</span>
-                <Button 
-                  type="text" 
-                  danger 
-                  icon={<DeleteOutlined />}
-                  onClick={() => removeFromCart(item.id)}
-                  className="flex items-center justify-center hover:bg-red-50"
-                />
-              </div>
-            </div>
-          ))}
-          <div className="border-t pt-3 mt-3">
-            <div className="flex justify-between font-bold mb-3">
-              <span>Yhteensä:</span>
-              <span className="text-orange-500">{getCartTotal().toFixed(2)}€</span>
-            </div>
-            <Button 
-              type="primary" 
-              className="w-full h-10 text-base font-medium shadow-md bg-blue-600 hover:bg-blue-700"
-              onClick={() => navigate('/')}
-            >
-              Siirry kassalle
-            </Button>
-          </div>
-        </>
-      )}
-    </div>
-  );
 
   const handleMenu = (path) => {
     navigate(path);
@@ -158,7 +104,7 @@ export default function HeaderMenu() {
           <div className="border-l border-gray-600 h-8 mx-4"></div>
           
           <Popover 
-            content={<CartContent />}
+            content={<ShoppingCart />}
             title={
               <div className="flex items-center justify-between">
                 <span className="font-medium">Ostoskori</span>
@@ -185,7 +131,7 @@ export default function HeaderMenu() {
         
         <div className="flex items-center space-x-3">
           <Popover 
-            content={<CartContent />}
+            content={<ShoppingCart />}
             title="Ostoskori"
             trigger="click"
             placement="bottomRight"
