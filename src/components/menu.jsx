@@ -32,6 +32,8 @@ export default function HeaderMenu() {
     if (isAuth) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      localStorage.removeItem('orders');
+
       setIsAuthenticated(false);
       navigate("/");
     } else {

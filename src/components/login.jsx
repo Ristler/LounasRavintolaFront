@@ -17,8 +17,7 @@ export default function Login() {
    
       localStorage.setItem('user', JSON.stringify(response));
       localStorage.setItem('token', response.token);
-      
-      // Use the messageApi instance to show messages
+      console.log('User data saved to localStorageqddqwdqwd:', response);
       messageApi.success('Kirjautuminen onnistui!');
 
       setTimeout(() => {

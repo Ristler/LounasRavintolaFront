@@ -1,34 +1,40 @@
-import React, {useState, useEffect} from 'react';
-import { Button, message } from 'antd';
-import { ShoppingCartOutlined, MinusOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-//import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Button, message, Modal } from 'antd';
+import { ShoppingCartOutlined, MinusOutlined, PlusOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
+import { useAuth } from '../context/AuthContext';
 import { newOrder } from '../hooks/orderApiHook';
 
 const ShoppingCart = () => {
   const { cartItems, addToCart, removeFromCart, removeItemCompletely, getCartTotal } = useCart();
-    const [user, setUser] = useState(null);
+  const { user, isAuthenticated } = useAuth(); 
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { confirm } = Modal;
 
-  //const navigate = useNavigate();
-
-    useEffect(() => {
-      const userString = localStorage.getItem('user');
-      if (userString) {
-        const userData = JSON.parse(userString);
-        // Check if it's nested under a 'user' property
-        const userObject = userData.user || userData;
-        setUser(userObject);
-      }
-    }, []);
 
   const handleOrder = async () => {
-    if (!user || !user._id) {
-      console.error("User not logged in");
+
+    if (!isAuthenticated) {
+      console.log("User not logged in:", user);
+      
+      confirm({
+        title: 'Kirjautuminen vaaditaan',
+        icon: <ExclamationCircleOutlined />,
+        content: 'Sinun täytyy kirjautua sisään tehdäksesi tilauksen.',
+        okText: 'Kirjaudu sisään',
+        cancelText: 'Peruuta',
+        onOk() {
+          navigate('/kirjaudu');
+        },
+      });
       return;
     }
-  
+    
+    setLoading(true);
+    
     try {
-      // Format the order EXACTLY as your backend expects
       const order = {
         userId: user._id,
         items: cartItems.map(item => ({
@@ -44,13 +50,19 @@ const ShoppingCart = () => {
       const response = await newOrder(order);
       console.log("Order response:", response);
       
-      // Success handling - clear cart, show message, etc.
       message.success("Tilaus vastaanotettu!");
+     
+      cartItems.forEach(item => {
+        removeItemCompletely ? removeItemCompletely(item.id) : removeFromCart(item.id);
+      });
+    
     } catch (error) {
       console.error("Error creating order:", error);
       message.error("Tilauksen luominen epäonnistui");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
   
   return (
     <div className="min-w-[280px] max-h-[400px] overflow-y-auto py-2">
@@ -122,9 +134,11 @@ const ShoppingCart = () => {
             <Button 
               type="primary" 
               className="w-full h-10 text-base font-medium shadow-md bg-blue-600 hover:bg-blue-700"
-              onClick={() => handleOrder()}
+              onClick={handleOrder}
+              loading={loading}
+              disabled={cartItems.length === 0}
             >
-              Tilaa
+              {!user ? 'Kirjaudu sisään tilataksesi' : 'Tilaa'}
             </Button>
           </div>
         </>

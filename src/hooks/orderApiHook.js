@@ -19,7 +19,7 @@ const newOrder = async (order) => {
 
           body: JSON.stringify({
             userId: order.userId,
-            items: order.items, // Keep the same structure
+            items: order.items, 
             totalPrice: Number(order.totalPrice),
             orderScore: Number(order.orderScore)
           })
@@ -34,5 +34,48 @@ const newOrder = async (order) => {
         throw error;
     }
 };
-
-export {newOrder};
+const getUserOrders = async (userId) => {
+    try {
+        if (!orderApiUrl) {
+          throw new Error('API URL is undefined. Check your environment variables.');
+        }
+        
+        const options = {
+          method: 'GET',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+        
+        const response = await fetchData(`${orderApiUrl}/user/${userId}`, options);
+        console.log('User orders retrieved successfully:', response);
+        return response;
+    } catch (error) {
+        console.error('Error fetching user orders:', error);
+        throw error;
+    }
+}
+const getOrderById = async (orderId) => {
+    try {
+        if (!orderApiUrl) {
+          throw new Error('API URL is undefined. Check your environment variables.');
+        }
+        
+        const options = {
+          method: 'GET',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+        
+        const response = await fetchData(`${orderApiUrl}/${orderId}`, options);
+        console.log('Order retrieved successfully:', response);
+        return response;
+    } catch (error) {
+        console.error('Error fetching order:', error);
+        throw error;
+    }
+}
+export {newOrder, getUserOrders, getOrderById};

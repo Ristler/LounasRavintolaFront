@@ -1,36 +1,148 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Avatar, Statistic, Tabs, Button, Divider, Tag, List } from "antd";
-import { UserOutlined, ShoppingOutlined, HeartOutlined, SettingOutlined, LogoutOutlined } from '@ant-design/icons';
+import { Card, Avatar, Statistic, Tabs, Button, Divider, Tag, List, Spin, message, Modal, Table } from "antd";
+import { UserOutlined, ShoppingOutlined, HeartOutlined, SettingOutlined, LogoutOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { getUserOrders, getOrderById } from '../hooks/orderApiHook';
+
+
+// TODO!! GET ORDER BY ID, NEXT + MODAL TO IT'S OWN COMPONENT.. REFACTOR (orderModal.jsx)
+
+
 
 export default function Profile() {
-  const [user, setUser] = useState(null);
+  const { user, loading: userLoading, refreshUser } = useAuth(); // Use auth context
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const navigate = useNavigate();
-  
+
+
+  //initial page load, refresh user data
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem('user'));
-    if (!userData) {
-      navigate('/kirjaudu');
-      return;
+
+    refreshUser();
+  }, []);
+
+  useEffect(() => {
+    const loadOrders = async () => {
+      if (!user || !user._id) {
+        console.log('No user ID available, skipping orders fetch');
+        return;
+      }
+
+      try {
+        console.log('Loading orders for user ID:', user._id);
+        const response = await getUserOrders(user._id);
+        console.log('Orders API response:', response);
+        
+        if (response) {
+          setOrders(response);
+          localStorage.setItem('orders', JSON.stringify(response));
+        } else {
+          console.log('No orders returned from API');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadOrders();
+  }, [user?._id]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+
+      await refreshUser();
+      
+
+      const freshUserData = JSON.parse(localStorage.getItem('user'));
+      const freshUser = freshUserData?.user || freshUserData;
+      const userId = freshUser?._id;
+      
+      console.log('Fresh user ID from localStorage:', userId);
+      
+      if (userId) {
+        const ordersData = await getUserOrders(userId);
+        if (ordersData) {
+          console.log('Fresh orders loaded:', ordersData);
+          setOrders(ordersData);
+          localStorage.setItem('orders', JSON.stringify(ordersData));
+        } else {
+          console.log('No orders returned for fresh user');
+          setOrders([]);
+        }
+      } else {
+        console.warn('No user ID available after refresh');
+      }
+      
+      message.success('Tiedot päivitetty onnistuneesti');
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      message.error('Tietojen päivitys epäonnistui');
+    } finally {
+      setRefreshing(false);
     }
-    setUser(userData);
-  }, [navigate]);
+  };
 
+  if (userLoading || loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spin size="large" tip="Ladataan käyttäjätietoja..." />
+      </div>
+    );
+  }
 
-  // MOCK DATA. MYÖHEMMIN OIKEAA DATAA
-  const orderHistory = [
-    { id: '1001', date: '2023-04-25', total: 24.50, status: 'delivered' },
-    { id: '982', date: '2023-04-18', total: 18.90, status: 'delivered' },
-    { id: '879', date: '2023-03-30', total: 32.75, status: 'delivered' }
+  if (!user) {
+    navigate('/kirjaudu');
+    return null;
+  }
+
+  const userName = user.nimi || user.name || user.username || 'Käyttäjä';
+  const userEmail = user.email || user.sähköposti || '';
+  const userPoints = user.pisteet || user.points || 0;
+
+  const showOrderDetail = (order) => {
+    console.log("Selected order:", order);
+    setSelectedOrder(order);
+    setModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+  };
+
+  const columns = [
+    {
+      title: 'Tuote',
+      dataIndex: 'foodName',
+      key: 'foodName',
+      render: (_, item) => item.foodName || item.foodId || 'Tuntematon tuote'
+    },
+
+    {
+      title: 'Määrä',
+      dataIndex: 'quantity',
+      key: 'quantity',
+      align: 'center',
+    },
+    {
+      title: 'Hinta',
+      dataIndex: 'price',
+      key: 'price',
+      align: 'right',
+      render: price => `${parseFloat(price).toFixed(2)} €`
+    },
+    {
+      title: 'Yhteensä',
+      key: 'total',
+      align: 'right',
+      render: item => `${(parseFloat(item.price) * parseFloat(item.quantity)).toFixed(2)} €`
+    }
   ];
-
-  //MOCK DATA. MYÖHEMMIN OIKEAA DATAA
-  const favoriteItems = [
-    { id: 1, name: 'Lohikeitto', price: 12.90 },
-    { id: 2, name: 'Kasvispasta', price: 10.50 }
-  ];
-
-  if (!user) return null;
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
@@ -48,13 +160,19 @@ export default function Profile() {
             </div>
           }
           actions={[
-            <Button type="text" icon={<SettingOutlined />}>Asetukset</Button>,
-
+            <Button 
+              type="text" 
+              icon={<ReloadOutlined spin={refreshing} />} 
+              onClick={handleRefresh}
+              disabled={refreshing}
+            >
+              {refreshing ? 'Päivitetään...' : 'Päivitä tiedot'}
+            </Button>,
           ]}
         >
           <div className="text-center pt-2 pb-4">
-            <h2 className="text-xl font-bold">{user.nimi || 'Käyttäjä'}</h2>
-            <p className="text-gray-500">{user.email}</p>
+            <h2 className="text-xl font-bold">{userName}</h2>
+            <p className="text-gray-500">{userEmail}</p>
           </div>
           
           <Divider className="my-3" />
@@ -62,26 +180,21 @@ export default function Profile() {
           <div className="flex justify-around">
             <Statistic 
               title="Tilauksia" 
-              value={orderHistory.length} 
+              value={orders?.length || 0} 
               className="text-center" 
               valueStyle={{ fontSize: '1.5rem' }}
             />
+
             <Statistic 
-              title="Suosikkeja" 
-              value={favoriteItems.length} 
-              className="text-center"
-              valueStyle={{ fontSize: '1.5rem' }}
-            />
-             <Statistic 
               title="Pisteet" 
-              value={user.pisteet} 
+              value={userPoints} 
               className="text-center" 
               valueStyle={{ fontSize: '1.5rem' }}
             />
           </div>
         </Card>
         
-        {/* Activity Tabs */}
+        {/* Orders tab with click handler */}
         <div className="md:col-span-2">
           <Tabs
             defaultActiveKey="1"
@@ -98,65 +211,106 @@ export default function Profile() {
                 children: (
                   <List
                     itemLayout="horizontal"
-                    dataSource={orderHistory}
+                    dataSource={orders}
                     renderItem={(item) => (
                       <List.Item
-                        className="hover:bg-gray-50 rounded-lg p-2"
+                        className="hover:bg-gray-50 rounded-lg p-2 cursor-pointer"
+                        onClick={() => showOrderDetail(item)}
                         actions={[
-                         
-                        ]}
-                      >
-                        <List.Item.Meta
-                          title={`Tilaus #${item.id}`}
-                          description={`Tilattu ${item.date}`}
-                        />
-                        <div className="flex flex-col items-end">
-                          <span className="text-lg font-semibold text-gray-800">{item.total.toFixed(2)}€</span>
-                          <Tag color="green">{item.status === 'delivered' ? 'Toimitettu' : 'Käsittelyssä'}</Tag>
-                        </div>
-                      </List.Item>
-                    )}
-                  />
-                ),
-              },
-              {
-                key: '2',
-                label: (
-                  <span className="flex items-center">
-                    <HeartOutlined className="mr-2" />
-                    Suosikit
-                  </span>
-                ),
-                children: (
-                  <List
-                    itemLayout="horizontal"
-                    dataSource={favoriteItems}
-                    renderItem={(item) => (
-                      <List.Item
-                        className="hover:bg-gray-50 rounded-lg p-2"
-                        actions={[
-                          <Button size="small" type="primary" className="bg-blue-500">
-                            Lisää koriin
+                          <Button key="view" type="link" onClick={(e) => {
+                            e.stopPropagation(); // Prevent triggering the List.Item click
+                            showOrderDetail(item);
+                          }}>
+                            Näytä tiedot
                           </Button>
                         ]}
                       >
                         <List.Item.Meta
-                          title={item.name}
-                          description="Suosikkiruokasi"
+                          title={`Tilaus #${item._id?.substring(0, 6) || item.id || 'Tuntematon'}`}
+                          description={`Tilattu ${new Date(item.createdAt || item.date).toLocaleDateString('fi-FI') || 'Tuntematon päivämäärä'}`}
                         />
-                        <div>
-                          <span className="font-semibold text-orange-500">{item.price.toFixed(2)}€</span>
+                        <div className="flex flex-col items-end">
+                          <span className="text-lg font-semibold text-gray-800">{item.totalPrice || 0}€</span>
+                          <Tag color={item.status === 'delivered' || item.status === 'Delivered' ? 'green' : 'blue'}>
+                            {item.status === 'delivered' || item.status === 'Delivered' ? 'Toimitettu' : 'Käsittelyssä'}
+                          </Tag>
                         </div>
                       </List.Item>
                     )}
-                    locale={{ emptyText: 'Ei vielä suosikkeja' }}
+                    locale={{ emptyText: 'Ei tilaushistoriaa' }}
                   />
                 ),
               },
+              
             ]}
           />
         </div>
       </div>
+      
+      {/* Order Detail Modal */}
+      <Modal
+        title={`Tilauksen tiedot #${selectedOrder?._id?.substring(0, 6) || 'Tilaus'}`}
+        open={modalVisible}
+        onCancel={handleModalClose}
+        footer={[
+          <Button key="close" onClick={handleModalClose}>
+            Sulje
+          </Button>
+        ]}
+        width={700}
+      >
+        {selectedOrder && (
+          <div className="py-2">
+            <div className="mb-4 flex justify-between">
+              <div>
+                <p className="text-gray-500">
+                  Tilauspäivä: {new Date(selectedOrder.createdAt || selectedOrder.date).toLocaleDateString('fi-FI')}
+                </p>
+                <p className="text-gray-500">
+                  Tila: <Tag color={selectedOrder.status === 'delivered' || selectedOrder.status === 'Delivered' ? 'green' : 'blue'}>
+                    {selectedOrder.status === 'delivered' || selectedOrder.status === 'Delivered' ? 'Toimitettu' : 'Käsittelyssä'}
+                  </Tag>
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-gray-500">Tilausnumero:</p>
+                <p className="font-mono">{selectedOrder._id || selectedOrder.id}</p>
+              </div>
+            </div>
+
+            <Divider className="my-4" />
+
+            <h3 className="text-lg font-medium mb-3">Tilatut tuotteet</h3>
+            
+            <Table
+              dataSource={selectedOrder.items.map((item, index) => ({
+                ...item,
+                key: index
+              }))}
+              columns={columns}
+              pagination={false}
+              summary={pageData => {
+                let totalPrice = 0;
+                pageData.forEach(item => {
+                  totalPrice += (parseFloat(item.price) * parseFloat(item.quantity));
+                });
+                
+                return (
+                  <Table.Summary.Row>
+                    <Table.Summary.Cell colSpan={3} className="text-right font-medium">
+                      Yhteensä:
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell className="text-right font-bold">
+                      {totalPrice.toFixed(2)} €
+                    </Table.Summary.Cell>
+                  </Table.Summary.Row>
+                );
+              }}
+            />
+          </div>
+        )}
+      </Modal>
+      
     </div>
   );
 }
