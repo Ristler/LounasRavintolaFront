@@ -26,4 +26,25 @@ const getAllFoods = async () => {
   }
 };
 
-export {getAllFoods};
+const getFoodsById  = async (foodId) => {
+  try {
+    if (!foodApiUrl) {
+      throw new Error('API URL is undefined. Check your environment variables.');
+    }
+
+    const options = {
+      mode: 'cors',
+      headers: {
+        'Content-type': 'application/json',
+      }
+    };
+
+    const response = await fetchData(`http://localhost:3000/foods/${foodId}`, options);
+    return response;
+  } catch (error) {
+    console.error('Error fetching foods by id: ', error);
+    throw error;
+  }
+};
+
+export {getAllFoods, getFoodsById};

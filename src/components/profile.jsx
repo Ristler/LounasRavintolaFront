@@ -3,11 +3,8 @@ import { Card, Avatar, Statistic, Tabs, Button, Divider, Tag, List, Spin, messag
 import { UserOutlined, ShoppingOutlined, HeartOutlined, SettingOutlined, LogoutOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getUserOrders, getOrderById } from '../hooks/orderApiHook';
-
-
-// TODO!! GET ORDER BY ID, NEXT + MODAL TO IT'S OWN COMPONENT.. REFACTOR (orderModal.jsx)
-
+import { getUserOrders } from '../hooks/orderApiHook';
+import { useOrderModal }  from './orderModal';
 
 
 export default function Profile() {
@@ -15,10 +12,9 @@ export default function Profile() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const navigate = useNavigate();
-
+  
+  const { handleModalOpen, ModalContent } = useOrderModal();
 
   //initial page load, refresh user data
   useEffect(() => {
@@ -107,42 +103,8 @@ export default function Profile() {
 
   const showOrderDetail = (order) => {
     console.log("Selected order:", order);
-    setSelectedOrder(order);
-    setModalVisible(true);
+    handleModalOpen(order);
   };
-
-  const handleModalClose = () => {
-    setModalVisible(false);
-  };
-
-  const columns = [
-    {
-      title: 'Tuote',
-      dataIndex: 'foodName',
-      key: 'foodName',
-      render: (_, item) => item.foodName || item.foodId || 'Tuntematon tuote'
-    },
-
-    {
-      title: 'Määrä',
-      dataIndex: 'quantity',
-      key: 'quantity',
-      align: 'center',
-    },
-    {
-      title: 'Hinta',
-      dataIndex: 'price',
-      key: 'price',
-      align: 'right',
-      render: price => `${parseFloat(price).toFixed(2)} €`
-    },
-    {
-      title: 'Yhteensä',
-      key: 'total',
-      align: 'right',
-      render: item => `${(parseFloat(item.price) * parseFloat(item.quantity)).toFixed(2)} €`
-    }
-  ];
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
@@ -247,69 +209,8 @@ export default function Profile() {
         </div>
       </div>
       
-      {/* Order Detail Modal */}
-      <Modal
-        title={`Tilauksen tiedot #${selectedOrder?._id?.substring(0, 6) || 'Tilaus'}`}
-        open={modalVisible}
-        onCancel={handleModalClose}
-        footer={[
-          <Button key="close" onClick={handleModalClose}>
-            Sulje
-          </Button>
-        ]}
-        width={700}
-      >
-        {selectedOrder && (
-          <div className="py-2">
-            <div className="mb-4 flex justify-between">
-              <div>
-                <p className="text-gray-500">
-                  Tilauspäivä: {new Date(selectedOrder.createdAt || selectedOrder.date).toLocaleDateString('fi-FI')}
-                </p>
-                <p className="text-gray-500">
-                  Tila: <Tag color={selectedOrder.status === 'delivered' || selectedOrder.status === 'Delivered' ? 'green' : 'blue'}>
-                    {selectedOrder.status === 'delivered' || selectedOrder.status === 'Delivered' ? 'Toimitettu' : 'Käsittelyssä'}
-                  </Tag>
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-gray-500">Tilausnumero:</p>
-                <p className="font-mono">{selectedOrder._id || selectedOrder.id}</p>
-              </div>
-            </div>
-
-            <Divider className="my-4" />
-
-            <h3 className="text-lg font-medium mb-3">Tilatut tuotteet</h3>
-            
-            <Table
-              dataSource={selectedOrder.items.map((item, index) => ({
-                ...item,
-                key: index
-              }))}
-              columns={columns}
-              pagination={false}
-              summary={pageData => {
-                let totalPrice = 0;
-                pageData.forEach(item => {
-                  totalPrice += (parseFloat(item.price) * parseFloat(item.quantity));
-                });
-                
-                return (
-                  <Table.Summary.Row>
-                    <Table.Summary.Cell colSpan={3} className="text-right font-medium">
-                      Yhteensä:
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell className="text-right font-bold">
-                      {totalPrice.toFixed(2)} €
-                    </Table.Summary.Cell>
-                  </Table.Summary.Row>
-                );
-              }}
-            />
-          </div>
-        )}
-      </Modal>
+      {/* Render Detail Modal */}
+      <ModalContent />
       
     </div>
   );
