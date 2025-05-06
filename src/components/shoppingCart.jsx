@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { newOrder } from '../hooks/orderApiHook';
 
 const ShoppingCart = () => {
-  const { cartItems, addToCart, removeFromCart, removeItemCompletely, getCartTotal } = useCart();
+  const { cartItems, addToCart, increaseQuantity, removeFromCart, removeItemCompletely, getCartTotal } = useCart();
   const { user, isAuthenticated } = useAuth(); 
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -105,7 +105,7 @@ const ShoppingCart = () => {
                     type="text" 
                     size="small"
                     icon={<PlusOutlined />}
-                    onClick={() => addToCart(item)}
+                    onClick={() => increaseQuantity(item.id)}
                     className="text-gray-500 hover:text-blue-500 border-0" 
                   />
                 </div>

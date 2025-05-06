@@ -16,11 +16,11 @@ export function CartProvider({ children }) {
   const addToCart = (food) => {
     // Debug logging
     console.log("Attempting to add food item:", food);
+    console.log('food type is', typeof food.id);
     console.log("Current cart items:", cartItems);
-    
     // Ensure food has a valid ID
     if (!food._id) {
-      console.error("Food item has no ID:", food);
+      console.error("Food item has no ID:", food._id);
       return;
     }
     
@@ -74,6 +74,24 @@ export function CartProvider({ children }) {
     });
   };
 
+  const increaseQuantity = (foodId) => {
+    setCartItems(prev => {
+      const existingItemIndex = prev.findIndex(item => item.id === foodId);
+
+      if (existingItemIndex !== -1) {
+        const updatedCart = [...prev];
+        updatedCart[existingItemIndex] = {
+          ...updatedCart[existingItemIndex],
+          quantity: updatedCart[existingItemIndex].quantity + 1
+        };
+        return updatedCart;
+      } else {
+        return console.error(`No ${foodId} item found`)
+      }
+
+    })
+  }
+
   const removeFromCart = (foodId) => {
     setCartItems(prev => {
       const existingItemIndex = prev.findIndex(item => item.id === foodId);
@@ -113,6 +131,7 @@ export function CartProvider({ children }) {
     <CartContext.Provider value={{
       cartItems,
       addToCart,
+      increaseQuantity,
       removeFromCart,
       removeItemCompletely,
       getCartTotal,
