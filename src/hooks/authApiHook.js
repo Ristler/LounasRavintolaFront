@@ -27,6 +27,40 @@ const userLogin = async (user) => {
         throw error;
     }
 };
+const userLogout = async () => {
+
+    try {
+        if (!authApiUrl) {
+          throw new Error('API URL is undefined. Check your environment variables.');
+        }
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Authentication token not found. Please log in.');
+        } 
+        const options = {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        const response = await fetchData(`${authApiUrl}/logout`, options);
+        console.log('User logged out successfully:', response);
+        // Clear localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        return response;
+    } catch (error) {   
+        console.error('Error logging out user:', error);
+        // If token is invalid, clear localStorage
+        if (error.message.includes('401') || error.message.includes('unauthorized')) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+        throw error;
+    }
+};
 
 
 const getMe = async () => {
@@ -66,4 +100,4 @@ const getMe = async () => {
     }
 };
 
-export {userLogin, getMe}
+export {userLogin, getMe, userLogout}

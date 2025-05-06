@@ -4,11 +4,12 @@ import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext'; 
 
 import HeaderMenu from './components/menu';
-import Landing from './components/landing'; 
 import Profile from './components/profile'; 
 import Login from './components/login';
 import OrderFood from "./components/orderFood";
 import Register from "./components/register";
+import ProtectedRoute from "./components/protectedRoute";
+import AdminPage from "./components/adminPage"; 
 
 const { Header, Footer, Content } = Layout;
 
@@ -25,11 +26,36 @@ function App() {
               
               <Content className="flex-auto overflow-y-auto text-center bg-white text-black">
                 <Routes>
-                  <Route path="/" element={<Landing />} />
-                  <Route path="/profiili" element={<Profile />} />
+                  {/* Public routes */}
+                  <Route path="/" element={<OrderFood />} />
                   <Route path="/kirjaudu" element={<Login />} />
-                  <Route path="/tilaa" element={<OrderFood />} />
                   <Route path="/liity" element={<Register />} />
+
+               
+              
+            
+                     
+                  
+                  {/* Protected routes */}
+                  <Route 
+                    path="/profiili" 
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    } 
+                  />
+
+
+                  <Route 
+                    path="/admin" 
+                    element={
+                      <ProtectedRoute adminOnly >
+                        <AdminPage />
+                      </ProtectedRoute>
+                    }
+                    />
+             
                 </Routes>
               </Content>
 

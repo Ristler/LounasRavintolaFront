@@ -9,6 +9,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useCart } from '../context/CartContext.jsx';
 import ShoppingCart from "./shoppingCart";
+import { userLogout } from "../hooks/authApiHook.js";
 
 export default function HeaderMenu() {
   const { cartItems } = useCart();
@@ -58,21 +59,12 @@ export default function HeaderMenu() {
         
         <div className="flex items-center justify-center w-full">
           <div className="flex space-x-2">
+           
+            
             <button 
               onClick={() => handleMenu("/")}
               className={`px-4 py-2 rounded-md flex items-center space-x-1 transition-colors
                 ${location.pathname === "/" 
-                  ? "bg-gray-700 text-white" 
-                  : "text-gray-300 hover:bg-gray-700 hover:text-white"}`}
-            >
-              <HomeOutlined />
-              <span>Kotiin</span>
-            </button>
-            
-            <button 
-              onClick={() => handleMenu("/tilaa")}
-              className={`px-4 py-2 rounded-md flex items-center space-x-1 transition-colors
-                ${location.pathname === "/tilaa" 
                   ? "bg-gray-700 text-white" 
                   : "text-gray-300 hover:bg-gray-700 hover:text-white"}`}
             >
@@ -160,21 +152,11 @@ export default function HeaderMenu() {
           ${mobileMenuOpen ? 'max-h-[500px] opacity-100 py-3' : 'max-h-0 opacity-0 py-0'}`}
       >
         <div className="px-4 space-y-1">
+       
           <button 
             onClick={() => handleMenu("/")}
             className={`w-full text-left px-4 py-2 rounded-md flex items-center space-x-3 transition-colors
               ${location.pathname === "/" 
-                ? "bg-gray-700 text-white" 
-                : "text-gray-300 hover:bg-gray-700 hover:text-white"}`}
-          >
-            <HomeOutlined />
-            <span>Kotiin</span>
-          </button>
-          
-          <button 
-            onClick={() => handleMenu("/tilaa")}
-            className={`w-full text-left px-4 py-2 rounded-md flex items-center space-x-3 transition-colors
-              ${location.pathname === "/tilaa" 
                 ? "bg-gray-700 text-white" 
                 : "text-gray-300 hover:bg-gray-700 hover:text-white"}`}
           >

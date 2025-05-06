@@ -96,10 +96,6 @@ export default function Profile() {
     );
   }
 
-  if (!user) {
-    navigate('/kirjaudu');
-    return null;
-  }
 
   const userName = user.nimi || user.name || user.username || 'Käyttäjä';
   const userEmail = user.email || user.sähköposti || '';
