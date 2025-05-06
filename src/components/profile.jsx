@@ -129,7 +129,7 @@ export default function Profile() {
               disabled={refreshing}
             >
               {refreshing ? 'Päivitetään...' : 'Päivitä tiedot'}
-            </Button>,
+            </Button>
           ]}
         >
           <div className="text-center pt-2 pb-4">

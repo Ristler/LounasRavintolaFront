@@ -33,7 +33,7 @@ export function  useOrderModal() {
     setSelectedOrder(null);
   }
   
-  const ModalContent = React.memo(() => {
+  const ModalContent = () => {
     return (
       <Modal
         title={`Tilauksen tiedot #${selectedOrder?._id?.substring(0, 6) || 'Tilaus'}`}
@@ -125,6 +125,6 @@ export function  useOrderModal() {
         )}
       </Modal>
     );
-  });
+  };
   return { handleModalOpen, ModalContent};
 }
