@@ -37,7 +37,7 @@ const optionsUser = async (type, token, data) => {
       }
       console.log(userApiUrl);
       const options = {
-        method: type,
+        method: 'DELETE',
         mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
