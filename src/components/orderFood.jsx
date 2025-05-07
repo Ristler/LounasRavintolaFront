@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Button, message, Spin, Typography, Badge, Rate } from "antd";
+import { Card, Button, message, Spin, Typography, Badge } from "antd";
 import { ShoppingCartOutlined, HeartOutlined  } from '@ant-design/icons';
 import { useCart } from '../context/CartContext';
 import { getAllFoods } from '../hooks/foodApiHook';
@@ -58,7 +58,7 @@ export default function OrderFood() {
         >
           <div className="flex flex-col h-48">
             <Title level={4} className="mb-1">{food.name}</Title>
-            <Rate disabled defaultValue={4.5} className="mb-2 text-sm" />
+        
             <Paragraph 
               className="text-gray-600 mb-2 flex-grow overflow-hidden"
               ellipsis={{ rows: 2 }}
