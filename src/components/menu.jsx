@@ -2,7 +2,7 @@ import { Popover, Button, Badge } from "antd";
 import { 
   HomeOutlined, UserOutlined, ShoppingCartOutlined, ShoppingOutlined,
   DeleteOutlined, LoginOutlined, LogoutOutlined, UserAddOutlined, 
-  MenuOutlined, 
+  MenuOutlined, SettingOutlined
 } from '@ant-design/icons';
 
 import { useNavigate, useLocation } from "react-router-dom";
@@ -10,33 +10,43 @@ import { useEffect, useState } from "react";
 import { useCart } from '../context/CartContext.jsx';
 import ShoppingCart from "./shoppingCart";
 import { userLogout } from "../hooks/authApiHook.js";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function HeaderMenu() {
   const { cartItems } = useCart();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth(); 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token);
-  }, [location]);
+  const isAdmin = user && user.rooli === 'admin';
   
+  useEffect(() => {
+    console.log("Menu: User state updated", { 
+      isAuthenticated,
+      user,
+      isAdmin: isAdmin ? true : false,
+      role: user?.rooli
+    });
+  }, [user, isAuthenticated]);
 
   const handleMenu = (path) => {
     navigate(path);
     setMobileMenuOpen(false);
   };
   
-  const handleAuth = (isAuth) => {
+  const handleAuth = async (isAuth) => {
     if (isAuth) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      localStorage.removeItem('orders');
-
-      setIsAuthenticated(false);
-      navigate("/");
+      try {
+  
+        await userLogout();
+        
+        logout();
+        
+        navigate("/");
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
     } else {
       navigate("/liity");
     }
@@ -48,19 +58,12 @@ export default function HeaderMenu() {
     setMobileMenuOpen(prevState => !prevState);
   };
 
-
   //DESKTOP MENU
   return (
     <nav className="bg-gray-800 shadow-md">
-     
       <div className="hidden md:flex flex-col items-center px-6 py-0 max-w-7xl mx-auto">
-  
-
-        
         <div className="flex items-center justify-center w-full">
           <div className="flex space-x-2">
-           
-            
             <button 
               onClick={() => handleMenu("/")}
               className={`px-4 py-2 rounded-md flex items-center space-x-1 transition-colors
@@ -82,6 +85,20 @@ export default function HeaderMenu() {
               {isAuthenticated ? <UserOutlined /> : <LoginOutlined />}
               <span>{isAuthenticated ? "Profiili" : "Kirjaudu sisään"}</span>
             </button>
+            
+            {/* Admin button - only show if user is admin */}
+            {isAdmin && (
+              <button 
+                onClick={() => handleMenu("/admin")}
+                className={`px-4 py-2 rounded-md flex items-center space-x-1 transition-colors
+                  ${location.pathname === "/admin" 
+                    ? "bg-gray-700 text-white" 
+                    : "text-gray-300 hover:bg-gray-700 hover:text-white"}`}
+              >
+                <SettingOutlined />
+                <span>Hallinta</span>
+              </button>
+            )}
             
             <button 
               onClick={() => handleAuth(isAuthenticated)}
@@ -121,8 +138,6 @@ export default function HeaderMenu() {
       
       {/* Mobile Menu Button */}
       <div className="md:hidden flex justify-between items-center px-4 py-3">
-   
-        
         <div className="flex items-center space-x-3">
           <Popover 
             content={<ShoppingCart />}
@@ -152,7 +167,6 @@ export default function HeaderMenu() {
           ${mobileMenuOpen ? 'max-h-[500px] opacity-100 py-3' : 'max-h-0 opacity-0 py-0'}`}
       >
         <div className="px-4 space-y-1">
-       
           <button 
             onClick={() => handleMenu("/")}
             className={`w-full text-left px-4 py-2 rounded-md flex items-center space-x-3 transition-colors
@@ -174,6 +188,20 @@ export default function HeaderMenu() {
             {isAuthenticated ? <UserOutlined /> : <LoginOutlined />}
             <span>{isAuthenticated ? "Profiili" : "Kirjaudu sisään"}</span>
           </button>
+          
+          {/* Admin button in mobile menu - only for admins */}
+          {isAdmin && (
+            <button 
+              onClick={() => handleMenu("/admin")}
+              className={`w-full text-left px-4 py-2 rounded-md flex items-center space-x-3 transition-colors
+                ${location.pathname === "/admin" 
+                  ? "bg-gray-700 text-white" 
+                  : "text-gray-300 hover:bg-gray-700 hover:text-white"}`}
+            >
+              <SettingOutlined />
+              <span>Hallinta</span>
+            </button>
+          )}
           
           <button 
             onClick={() => handleAuth(isAuthenticated)}

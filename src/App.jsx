@@ -60,7 +60,8 @@ function App() {
               </Content>
 
               <Footer className="!bg-gray-800 !text-white text-center flex-none">
-                Lounasravintola 2025
+              Mättötie 3B, 12345 Ruokakaupunki.
+              Puh: 123-456-7890
               </Footer>
             </Layout>
           </CartProvider>
