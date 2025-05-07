@@ -29,11 +29,17 @@ const newOrder = async (order) => {
         console.log('Order created successfully:', response);
         return response;
     } catch (error) {
-        console.error('Error creating order:', error);
-        console.log('Order details:', order);
+        
+       
         throw error;
     }
 };
+
+
+
+
+
+
 const getUserOrders = async (userId) => {
     try {
         if (!orderApiUrl) {
@@ -49,11 +55,12 @@ const getUserOrders = async (userId) => {
         };
         
         const response = await fetchData(`${orderApiUrl}/user/${userId}`, options);
-        console.log('User orders retrieved successfully:', response);
         return response;
     } catch (error) {
         console.error('Error fetching user orders:', error);
-        throw error;
+   
+        
+    
     }
 }
 const getOrderById = async (orderId) => {
@@ -69,15 +76,22 @@ const getOrderById = async (orderId) => {
             'Content-Type': 'application/json'
           }
         };
+
+        if(response.status === 404) {
+            console.error('Orders not found');
+            return null;
+        }
         
         const response = await fetchData(`${orderApiUrl}/${orderId}`, options);
         console.log('Order retrieved successfully:', response);
         return response;
     } catch (error) {
         console.error('Error fetching order:', error);
-        throw error;
+   
     }
 }
+
+
 const getAllOrders = async () => {
     try { 
         if (!orderApiUrl) {

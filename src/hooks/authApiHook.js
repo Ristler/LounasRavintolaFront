@@ -7,7 +7,6 @@ const userLogin = async (user) => {
           throw new Error('API URL is undefined. Check your environment variables.');
         }
   
-        console.log(authApiUrl);
         const options = {
           method: 'POST',
           mode: 'cors',
@@ -20,7 +19,6 @@ const userLogin = async (user) => {
           })
         };
         const response = await fetchData(`${authApiUrl}/login`, options);
-        console.log('User logged in successfully:', response);
         return response;
     } catch (error) {
         console.error('Error logging in user:', error);
@@ -46,7 +44,6 @@ const userLogout = async () => {
           }
         };
         const response = await fetchData(`${authApiUrl}/logout`, options);
-        console.log('User logged out successfully:', response);
         // Clear localStorage
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -87,7 +84,6 @@ const getMe = async () => {
         // Assuming your API has a /me endpoint - adjust the URL as needed
         const response = await fetchData(`${authApiUrl}/getMe`, options);
         
-        console.log('User data retrieved successfully:', response);
         return response;
     } catch (error) {
         console.error('Error fetching user data:', error);

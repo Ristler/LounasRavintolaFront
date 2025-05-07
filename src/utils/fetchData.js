@@ -1,6 +1,5 @@
 const fetchData = async (url, options = {}) => {
   try {
-    console.log('Fetching data from URL:', url);
     const response = await fetch(url, options);
     
     // Check if response is JSON by looking at Content-Type header
@@ -20,6 +19,10 @@ const fetchData = async (url, options = {}) => {
       }
       throw new Error(`Error ${response.status} occurred`);
     }
+    if(response.status === 404) {
+      console.log('Resource not found');
+    }
+
     
     return json;
   } catch (error) {

@@ -23,15 +23,11 @@ export const AuthProvider = ({ children }) => {
       const userString = localStorage.getItem('user');
       const token = localStorage.getItem('token');
       
-      console.log("Auth context: checking localStorage", { 
-        hasUserString: !!userString, 
-        hasToken: !!token 
-      });
+     
       
       if (userString) {
         try {
           const userData = JSON.parse(userString);
-          console.log("Auth context: parsed localStorage user", userData);
           
           // Extract user object from whatever structure we have
           let userObject = null;
@@ -45,7 +41,6 @@ export const AuthProvider = ({ children }) => {
           
           // Validate user object has required fields
           if (userObject && userObject._id) {
-            console.log("Auth context: valid user from localStorage", { id: userObject._id });
             setUser(userObject);
           } else {
             console.warn("Auth context: invalid user object in localStorage", userObject);
@@ -60,9 +55,7 @@ export const AuthProvider = ({ children }) => {
       // Then try API for fresh data if we have a token
       if (token) {
         try {
-          console.log("Auth context: fetching fresh user data with token", token.substring(0, 10) + '...');
           const response = await getMe();
-          console.log("Auth context: API response", response);
           
           // Extract user from API response with detailed validation
           let freshUserData = null;
@@ -80,7 +73,6 @@ export const AuthProvider = ({ children }) => {
           }
           
           if (freshUserData && freshUserData._id) {
-            console.log("Auth context: setting fresh user data", freshUserData);
             setUser(freshUserData);
             localStorage.setItem('user', JSON.stringify({ user: freshUserData }));
           } else {
@@ -116,14 +108,12 @@ export const AuthProvider = ({ children }) => {
 
   // Handle login success
   const loginSuccess = (userData, token) => {
-    console.log("Login success function called", { userData, token });
     if (!userData || !token) {
       console.error("Invalid login data", { userData, token });
       message.error("Kirjautuminen epäonnistui: virheellinen vastaus");
       return;
     }
-    
-    console.log("Login successful", { userData, tokenLength: token.length });
+
     
     // Store token and user data
     localStorage.setItem('token', token);

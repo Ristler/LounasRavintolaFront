@@ -14,10 +14,7 @@ export function CartProvider({ children }) {
   }, [cartItems]);
 
   const addToCart = (food) => {
-    // Debug logging
-    console.log("Attempting to add food item:", food);
-    console.log('food type is', typeof food.id);
-    console.log("Current cart items:", cartItems);
+    
     // Ensure food has a valid ID
     if (!food._id) {
       console.error("Food item has no ID:", food._id);
@@ -26,7 +23,6 @@ export function CartProvider({ children }) {
     
     setCartItems(prev => {
       // Log the comparison that's happening
-      console.log(`Comparing new item ID: ${food._id} (${typeof food._id}) with existing cart items`);
       
       // Check if the item is already in cart
       // Use strict equality (===) instead of loose equality (==)

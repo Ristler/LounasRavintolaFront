@@ -22,12 +22,7 @@ export default function HeaderMenu() {
   const isAdmin = user && user.rooli === 'admin';
   
   useEffect(() => {
-    console.log("Menu: User state updated", { 
-      isAuthenticated,
-      user,
-      isAdmin: isAdmin ? true : false,
-      role: user?.rooli
-    });
+   
   }, [user, isAuthenticated]);
 
   const handleMenu = (path) => {
@@ -54,7 +49,6 @@ export default function HeaderMenu() {
   };
 
   const toggleMobileMenu = () => {
-    console.log("Toggle mobile menu, current state:", mobileMenuOpen);
     setMobileMenuOpen(prevState => !prevState);
   };
 
