@@ -30,4 +30,31 @@ const newUser = async (user) => {
     }
 };
 
-export {newUser};
+const optionsUser = async (type, token, data) => {
+  try {
+      if (!userApiUrl) {
+        throw new Error('API URL is undefined. Check your environment variables.');
+      }
+      console.log(userApiUrl);
+      const options = {
+        method: 'DELETE',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer: ${token}`
+        },
+        body: JSON.stringify({
+          ...data 
+        })
+      };
+      
+      const response = await fetchData(`${userApiUrl}`, options);
+      console.log('User created successfully:', response);
+      return response;
+  } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+  }
+};
+
+export {newUser, optionsUser};
