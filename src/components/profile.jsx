@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Avatar, Statistic, Tabs, Button, Divider, Tag, List, Spin, message, Modal, Table } from "antd";
+import { Card, Avatar, Statistic, Tabs, Button, Divider, Tag, 
+  List, Spin, message, Modal, Table, Form, Input } from "antd";
 import { UserOutlined, ShoppingOutlined, HeartOutlined, SettingOutlined, LogoutOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserOrders } from '../hooks/orderApiHook';
+import { optionsUser } from '../hooks/userApiHook';
 import { useOrderModal }  from './orderModal';
 
 
@@ -106,6 +108,24 @@ export default function Profile() {
     handleModalOpen(order);
   };
 
+  const deleteAccount = () => {
+    const choise = confirm("Oletko varma, että haluat poistaa tilisi lopullisesti? Poistettuja tilejä ei voida enää palauttaa")
+    if (choise) {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      try {
+        optionsUser('DELETE', localStorage.getItem('token'), userData.user._id);
+        alert('Tilisi on nyt poistettu. Siirryt kirjautumissivulle')
+        refreshUser();
+      } catch (error) {
+        console.log('error', error)
+        alert("Virhe tilin poistossa. Yritä myöhemmin uudelleen ")
+      }
+    } else {
+      alert("Peruutit toiminnon")
+    }
+    
+  }
+
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -203,10 +223,88 @@ export default function Profile() {
                   />
                 ),
               },
+              {
+                key: 2,
+                label: (
+                  <span className="flex items-center">
+                    <UserOutlined className="mr-2" />
+                    Päivitä tiedot
+                  </span>
+                ),
+                children: (<Form
+                  layout="vertical"
+                  initialValues={{
+                    username: userName,
+                    email: userEmail,
+                    password: ''
+                  }}
+                  onFinish={(values) => {
+                    console.log('Updated user information:', values)
+                    const updatedData = {
+                      nimi: values.username,
+                      email: values.email,
+                    };
+                    if (values.password) {
+                      updatedData.salasana = values.password;
+                    }
+
+                    try {
+                      const response = optionsUser('PUT', localStorage.getItem('token'), updatedData)
+                      if (response) {
+                        alert("Tiedot päivitetty onnistuneesti!", response)
+                      }                      
+                    } catch (error) {
+                      alert("Tapahtui odottamaton virhe", error)
+                    }
+                    
+                    message.success('Tietosi on päivitetty onnistuneesti!');
+                  }}
+                > Alla näet omat tietosi. Jos haluat päivittää tietojasi, muuta haluamasi kentät ja paina 'Päivitä tiedot'. Jos et halua tehdä muutoksia, jätä kentät ennalleen.
+                  <Form.Item
+                    label="Käyttäjänimi"
+                    name="username"
+                  >
+                    <Input placeholder="Syötä uusi käyttäjänimi" />
+                  </Form.Item>
+                
+                  <Form.Item
+                    label="Sähköposti"
+                    name="email"
+                    rules={[
+                      { type: 'email', message: 'Syötä kelvollinen sähköpostiosoite' },
+                    ]}
+                  >
+                    <Input placeholder="Syötä uusi sähköpostiosoite" />
+                  </Form.Item>
+                
+                  <Form.Item
+                    label="Salasana"
+                    name="password"
+                    rules={[
+                      { required: false, message: 'Salasana on pakollinen' },
+                      { min: 8, message: 'Salasanan on oltava vähintään 8 merkkiä pitkä' },
+                    ]}
+                  >
+                    <Input.Password placeholder="Syötä uusi salasana" />
+                  </Form.Item>
+                
+                  <Form.Item>
+                    <Button type="primary" htmlType="submit">
+                      Päivitä tiedot
+                    </Button>
+
+                    <Button type="primary" danger onClick={() => deleteAccount()}>
+                      Poista tili
+                    </Button>
+                  </Form.Item>
+                </Form>)
+                
+              }
               
             ]}
           />
         </div>
+        
       </div>
       
       {/* Render Detail Modal */}

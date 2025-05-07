@@ -39,7 +39,7 @@ const getFoodsById  = async (foodId) => {
       }
     };
 
-    const response = await fetchData(`http://localhost:3000/foods/${foodId}`, options);
+    const response = await fetchData(`${foodApiUrl}/${foodId}`, options);
     return response;
   } catch (error) {
     console.error('Error fetching foods by id: ', error);
