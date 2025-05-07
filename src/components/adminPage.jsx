@@ -158,7 +158,7 @@ const AdminPage = () => {
       okType: 'primary',
       cancelText: 'Peruuta',
       onOk() {
-        handleStatusChange(orderId, 'completed');
+        handleStatusChange(orderId, 'delivered');
       },
     });
   };
@@ -230,7 +230,7 @@ const AdminPage = () => {
         if (status === 'processing') {
           color = 'processing';
           text = 'Käsittelyssä';
-        } else if (status === 'completed') {
+        } else if (status === 'delivered') {
           color = 'success';
           text = 'Valmis';
         }
@@ -251,11 +251,11 @@ const AdminPage = () => {
             Näytä
           </Button>
           
-          {record.status !== 'completed' && (
+          {record.status !== 'delivered' && (
             <Button 
               type="primary" 
               icon={<CheckCircleOutlined />} 
-              onClick={() => handleStatusChange(record._id, 'completed')}
+              onClick={() => handleStatusChange(record._id, 'delivered')}
               size="small"
             >
               Valmis
@@ -320,13 +320,13 @@ const AdminPage = () => {
             Sulje
           </Button>,
 
-          currentOrder && currentOrder.status !== 'completed' && (
+          currentOrder && currentOrder.status !== 'delivered' && (
             <Button
               key="complete"
               type="primary"
               icon={<CheckCircleOutlined />}
               onClick={() => {
-                handleStatusChange(currentOrder._id, 'completed');
+                handleStatusChange(currentOrder._id, 'delivered');
                 setModalVisible(false);
               }}
             >
@@ -355,11 +355,11 @@ const AdminPage = () => {
                 <p>
                   <Badge 
                     status={
-                      currentOrder.status === 'completed' ? 'success' : 
+                      currentOrder.status === 'delivered' ? 'success' : 
                       currentOrder.status === 'processing' ? 'processing' : 'default'
                     } 
                     text={
-                      currentOrder.status === 'completed' ? 'Valmis' : 
+                      currentOrder.status === 'delivered' ? 'Valmis' : 
                       currentOrder.status === 'processing' ? 'Käsittelyssä' : 'Odottaa'
                     } 
                   />
