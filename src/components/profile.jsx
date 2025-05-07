@@ -3,14 +3,14 @@ import { Card, Avatar, Statistic, Tabs, Button, Divider, Tag,
   List, Spin, message, Modal, Table, Form, Input } from "antd";
 import { UserOutlined, ShoppingOutlined, HeartOutlined, SettingOutlined, LogoutOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, logout } from '../context/AuthContext';
 import { getUserOrders } from '../hooks/orderApiHook';
-import { optionsUser } from '../hooks/userApiHook';
+import { deleteUser } from '../hooks/userApiHook';
 import { useOrderModal }  from './orderModal';
 
 
 export default function Profile() {
-  const { user, loading: userLoading, refreshUser } = useAuth(); // Use auth context
+  const { user, loading: userLoading, refreshUser, logout } = useAuth(); // Use auth context
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -109,9 +109,11 @@ export default function Profile() {
     if (choise) {
       const userData = JSON.parse(localStorage.getItem('user'));
       try {
-        optionsUser('DELETE', localStorage.getItem('token'), userData.user._id);
-        alert('Tilisi on nyt poistettu. Siirryt kirjautumissivulle')
-        refreshUser();
+        const response = deleteUser(localStorage.getItem('token'), userData.user._id);
+        if (response) {
+          alert('Tilisi on nyt poistettu. Siirryt kirjautumissivulle');
+          logout();
+        }
       } catch (error) {
         console.log('error', error)
         alert("Virhe tilin poistossa. Yritä myöhemmin uudelleen ")
