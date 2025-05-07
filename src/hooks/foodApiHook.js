@@ -18,10 +18,8 @@ const getAllFoods = async () => {
     };
     
     const response = await fetchData(foodApiUrl, options);
-    console.log('Foods fetched successfully:', response);
     return response;
   } catch (error) {
-    console.error('Error fetching foods:', error);
     throw error;
   }
 };
@@ -42,7 +40,6 @@ const getFoodsById  = async (foodId) => {
     const response = await fetchData(`${foodApiUrl}/${foodId}`, options);
     return response;
   } catch (error) {
-    console.error('Error fetching foods by id: ', error);
     throw error;
   }
 };

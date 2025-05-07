@@ -21,7 +21,6 @@ const userLogin = async (user) => {
         const response = await fetchData(`${authApiUrl}/login`, options);
         return response;
     } catch (error) {
-        console.error('Error logging in user:', error);
         throw error;
     }
 };
@@ -49,7 +48,6 @@ const userLogout = async () => {
         localStorage.removeItem('user');
         return response;
     } catch (error) {   
-        console.error('Error logging out user:', error);
         // If token is invalid, clear localStorage
         if (error.message.includes('401') || error.message.includes('unauthorized')) {
           localStorage.removeItem('token');
@@ -86,7 +84,6 @@ const getMe = async () => {
         
         return response;
     } catch (error) {
-        console.error('Error fetching user data:', error);
         // If token is invalid, clear localStorage
         if (error.message.includes('401') || error.message.includes('unauthorized')) {
           localStorage.removeItem('token');

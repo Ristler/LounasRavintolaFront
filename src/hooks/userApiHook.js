@@ -7,7 +7,6 @@ const newUser = async (user) => {
         if (!userApiUrl) {
           throw new Error('API URL is undefined. Check your environment variables.');
         }
-        console.log(userApiUrl);
         const options = {
           method: 'POST',
           mode: 'cors',
@@ -22,10 +21,8 @@ const newUser = async (user) => {
         };
         
         const response = await fetchData(`${userApiUrl}/user`, options);
-        console.log('User created successfully:', response);
         return response;
     } catch (error) {
-        console.error('Error creating user:', error);
         throw error;
     }
 };
@@ -35,7 +32,6 @@ const deleteUser = async (token, userId) => {
       if (!userApiUrl) {
         throw new Error('API URL is undefined. Check your environment variables.');
       }
-      console.log(userApiUrl);
       const options = {
         method: 'DELETE',
         mode: 'cors',
@@ -46,10 +42,8 @@ const deleteUser = async (token, userId) => {
       };
       
       const response = await fetchData(`${userApiUrl}/${userId}`, options);
-      console.log('User created successfully:', response);
       return response;
   } catch (error) {
-      console.error('Error creating user:', error);
       throw error;
   }
 };
@@ -59,7 +53,6 @@ const modifyUser = async (token, userId, data) => {
         if (!userApiUrl) {
           throw new Error('API URL is undefined. Check your environment variables.');
         }
-        console.log(userApiUrl);
         const options = {
           method: 'POST',
           mode: 'cors',
@@ -70,12 +63,8 @@ const modifyUser = async (token, userId, data) => {
             ...data 
           })
         };
-        
-        const response = await fetchData(`${userApiUrl}/user`, options);
-        console.log('User created successfully:', response);
         return response;
     } catch (error) {
-        console.error('Error creating user:', error);
         throw error;
     }
   }

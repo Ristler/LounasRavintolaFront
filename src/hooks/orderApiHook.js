@@ -9,7 +9,6 @@ const newOrder = async (order) => {
         }
 
         
-        console.log(orderApiUrl);
         const options = {
           method: 'POST',
           mode: 'cors',
@@ -26,7 +25,6 @@ const newOrder = async (order) => {
         };
         
         const response = await fetchData(`${orderApiUrl}`, options);
-        console.log('Order created successfully:', response);
         return response;
     } catch (error) {
         
@@ -57,10 +55,7 @@ const getUserOrders = async (userId) => {
         const response = await fetchData(`${orderApiUrl}/user/${userId}`, options);
         return response;
     } catch (error) {
-        console.error('Error fetching user orders:', error);
-   
-        
-    
+      throw error;
     }
 }
 const getOrderById = async (orderId) => {
@@ -78,19 +73,15 @@ const getOrderById = async (orderId) => {
         };
 
         if(response.status === 404) {
-            console.error('Orders not found');
             return null;
         }
         
         const response = await fetchData(`${orderApiUrl}/${orderId}`, options);
-        console.log('Order retrieved successfully:', response);
         return response;
     } catch (error) {
-        console.error('Error fetching order:', error);
-   
+      throw error;
     }
 }
-
 
 const getAllOrders = async () => {
     try { 
@@ -105,12 +96,10 @@ const getAllOrders = async () => {
           }
         };
         const response = await fetchData(`${orderApiUrl}`, options);
-        console.log('All orders retrieved successfully:', response);
         return response;
     }
 
     catch (error) {
-        console.error('Error fetching all orders:', error);
         throw error;
     }
 }
@@ -131,10 +120,8 @@ const pathOrderStatus = async (orderId, status) => {
         };
         
         const response = await fetchData(`${orderApiUrl}/${orderId}/${status}`, options);
-        console.log('Order status updated successfully:', response);
         return response;
     } catch (error) {
-        console.error('Error updating order status:', error);
         throw error;
     }
 }
