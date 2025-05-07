@@ -3,7 +3,7 @@ import { Card, Avatar, Statistic, Tabs, Button, Divider, Tag,
   List, Spin, message, Modal, Table, Form, Input } from "antd";
 import { UserOutlined, ShoppingOutlined, HeartOutlined, SettingOutlined, LogoutOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { useAuth, logout } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { getUserOrders } from '../hooks/orderApiHook';
 import { deleteUser } from '../hooks/userApiHook';
 import { useOrderModal }  from './orderModal';
@@ -32,9 +32,8 @@ export default function Profile() {
       }
 
       try {
-        console.log('Loading orders for user ID:', user._id);
         const response = await getUserOrders(user._id);
-        console.log('Orders API response:', response);
+
         
         if (response) {
           setOrders(response);
@@ -113,6 +112,8 @@ export default function Profile() {
         if (response) {
           alert('Tilisi on nyt poistettu. Siirryt kirjautumissivulle');
           logout();
+          
+         
         }
       } catch (error) {
         console.log('error', error)

@@ -20,7 +20,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 
   if (!user) {
 
-    return <Navigate to="/kirjaudu" />;
+    return <Navigate to="/" />;
   }
 
   if (adminOnly) {

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { getMe } from '../hooks/authApiHook';
 import { message } from 'antd';
 
@@ -8,14 +8,29 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Add loading ref to prevent duplicate calls
+  const loadingRef = useRef(false);
+  // Add counter to track API call attempts
+  const apiAttemptsRef = useRef(0);
 
-  // Load user on component mount
+  // Load user on component mount - with dependency array to prevent recreation
   useEffect(() => {
-    loadUser();
+    // Only call loadUser if we haven't already tried multiple times
+    if (apiAttemptsRef.current < 3) {
+      loadUser();
+    }
   }, []);
 
   // Load user from localStorage and API
   const loadUser = async () => {
+    // CRITICAL: Exit if already loading
+    if (loadingRef.current) {
+      console.log("Auth: Already loading user data, skipping duplicate call");
+      return;
+    }
+    
+    // Set loading flags
+    loadingRef.current = true;
     setLoading(true);
     
     try {
@@ -23,27 +38,26 @@ export const AuthProvider = ({ children }) => {
       const userString = localStorage.getItem('user');
       const token = localStorage.getItem('token');
       
-     
+      let userFromStorage = null;
       
       if (userString) {
         try {
           const userData = JSON.parse(userString);
           
           // Extract user object from whatever structure we have
-          let userObject = null;
           if (userData.user) {
-            userObject = userData.user;
+            userFromStorage = userData.user;
           } else if (userData.data && userData.data.user) {
-            userObject = userData.data.user;
+            userFromStorage = userData.data.user;
           } else {
-            userObject = userData;
+            userFromStorage = userData;
           }
           
           // Validate user object has required fields
-          if (userObject && userObject._id) {
-            setUser(userObject);
+          if (userFromStorage && userFromStorage._id) {
+            setUser(userFromStorage);
           } else {
-            console.warn("Auth context: invalid user object in localStorage", userObject);
+            console.warn("Auth context: invalid user object in localStorage");
           }
         } catch (parseError) {
           console.error("Error parsing stored user data:", parseError);
@@ -55,54 +69,85 @@ export const AuthProvider = ({ children }) => {
       // Then try API for fresh data if we have a token
       if (token) {
         try {
-          const response = await getMe();
+          // Track API attempts
+          apiAttemptsRef.current++;
           
-          // Extract user from API response with detailed validation
-          let freshUserData = null;
-          
-          if (response) {
-            if (response.user && response.user._id) {
-              freshUserData = response.user;
-            } else if (response.data && response.data.user && response.data.user._id) {
-              freshUserData = response.data.user;
-            } else if (response._id) {
-              freshUserData = response;
+          // Only call API if we don't have valid user data or we're below max attempts
+          if (!userFromStorage?._id || apiAttemptsRef.current <= 2) {
+            console.log(`Auth: Calling API (attempt ${apiAttemptsRef.current})`);
+            
+            // Set up AbortController for timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            // Call API with timeout
+            const response = await Promise.race([
+              getMe(),
+              new Promise((_, reject) => setTimeout(() => 
+                reject(new Error('API request timeout')), 5000))
+            ]);
+            
+            clearTimeout(timeoutId);
+            
+            // Extract user from API response with detailed validation
+            let freshUserData = null;
+            
+            if (response) {
+              if (response.user && response.user._id) {
+                freshUserData = response.user;
+              } else if (response.data && response.data.user && response.data.user._id) {
+                freshUserData = response.data.user;
+              } else if (response._id) {
+                freshUserData = response;
+              }
+            }
+            
+            if (freshUserData && freshUserData._id) {
+              setUser(freshUserData);
+              localStorage.setItem('user', JSON.stringify({ user: freshUserData }));
             } else {
-              console.error("Auth context: API response has invalid structure", response);
+              console.warn("Auth: API returned invalid user data");
+              // Keep using stored data if available
+              if (!userFromStorage) {
+                console.warn("Auth: No valid user data available, clearing token");
+                localStorage.removeItem('token');
+              }
             }
-          }
-          
-          if (freshUserData && freshUserData._id) {
-            setUser(freshUserData);
-            localStorage.setItem('user', JSON.stringify({ user: freshUserData }));
           } else {
-            console.warn("Auth context: API returned invalid user data", response);
-            // Token might be invalid - clear it if API returned error
-            if (response && (response.status === 401 || response.status === 403 || 
-                response.message === 'Unauthorized' || response.error === 'Unauthorized')) {
-              console.warn("Auth context: Unauthorized response, clearing token");
-              localStorage.removeItem('token');
-            }
+            console.log("Auth: Skipping API call, using cached data");
           }
         } catch (apiError) {
-          console.error("API error:", apiError);
-          setError("Could not refresh user data");
-          
-          // Check if unauthorized - if so, clear token
-          if (apiError.response && 
-             (apiError.response.status === 401 || apiError.response.status === 403)) {
-            console.warn("Auth context: API returned unauthorized, clearing token");
+          // Don't clear token for network errors
+          if (apiError.message === 'API request timeout' || 
+              apiError.message === 'Failed to fetch') {
+            console.log("Auth: Network error, keeping cached data");
+            // Keep using stored data
+          } else if (apiError.response?.status === 401 || 
+                    apiError.message?.includes('unauthorized')) {
+            console.warn("Auth: API returned unauthorized, clearing token");
             localStorage.removeItem('token');
+            // Only clear user if we don't have stored data
+            if (!userFromStorage) {
+              setUser(null);
+            }
           }
         }
       } else {
-        console.log("Auth context: No token found, user remains null");
+        console.log("Auth: No token found, user remains null");
+        setUser(null);
       }
     } catch (err) {
-      console.error("Error loading user:", err);
-      setError("Error loading user data");
+      console.error("Auth: Error loading user:", err.message);
+      // Don't update state for unexpected errors if we have user data
+      if (!user) {
+        setError("Error loading user data");
+      }
     } finally {
       setLoading(false);
+      // CRITICAL: Reset loading ref with delay
+      setTimeout(() => {
+        loadingRef.current = false;
+      }, 1000);
     }
   };
 
@@ -113,7 +158,8 @@ export const AuthProvider = ({ children }) => {
       message.error("Kirjautuminen epäonnistui: virheellinen vastaus");
       return;
     }
-
+    
+    console.log("Login successful", { userData, tokenLength: token.length });
     
     // Store token and user data
     localStorage.setItem('token', token);
